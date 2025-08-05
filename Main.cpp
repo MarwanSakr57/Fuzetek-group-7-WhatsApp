@@ -17,26 +17,29 @@ private:
     
 public:
     User() {
-        // TODO: Implement default constructor
+       username="";
+       password="";
+       phoneNumber="";
+       status="Offline";
     }
     
     User(string uname, string pwd, string phone) {
-        // TODO: Implement parameterized constructor
+       username=uname;
+       password=pwd;
+       phoneNumber=phone;
+       status="Offline";
     }
     
     string getUsername() const {
-        // TODO: Implement getter
-        return "";
+        return username;
     }
     
     string getPhoneNumber() const {
-        // TODO: Implement getter
-        return "";
+        return phoneNumber;
     }
     
     string getStatus() const {
-        // TODO: Implement getter
-        return "";
+        return status;
     }
     
     string getLastSeen() const {
@@ -45,11 +48,11 @@ public:
     }
     
     void setStatus(string newStatus) {
-        // TODO: Implement setter
+        status =newStatus;
     }
     
     void setPhoneNumber(string phone) {
-        // TODO: Implement setter
+        phoneNumber=phone;
     }
     
     void updateLastSeen() {
@@ -268,7 +271,54 @@ public:
     WhatsApp() : currentUserIndex(-1) {}
     
     void signUp() {
-        // TODO: Implement user registration
+        string uname;
+        string pass;
+        string phone;
+        cin.ignore();
+        while(true){
+            cout<<"Enter Username :"<<endl;
+            getline(cin,uname);
+            if(uname.empty()){                  //checks if user input is blank
+                cout<<"Please enter valid username"<<endl;
+            } else{
+                break;
+            }
+        }
+        while(true){
+            cout<<"Enter Password :"<<endl;
+            getline(cin,pass);
+            if(pass.empty()){
+                cout<<"Please enter valid password"<<endl;
+            } else{
+                break;
+            }
+        }
+        while(true){
+            cout<<"Enter Phone Number :"<<endl;
+            getline(cin,phone);
+            if(phone.empty()){
+                cout<<"Please enter valid phone number"<<endl;
+                continue;
+            }  
+     
+        bool invalid = false;
+        int count=0;
+        for (char c : phone) {
+            if (c < '0' || c > '9') {   //check if input is all numbers
+                invalid = true;
+                break; 
+            }
+            count++;
+        }
+
+        if (invalid||count!=11) {
+            cout << "Please enter a valid phone number (11 digits only)." << endl;
+            continue;
+        }
+        break;
+        }
+        User newuser(uname,pass,phone);
+        users.push_back(newuser);
     }
     
     void login() {
