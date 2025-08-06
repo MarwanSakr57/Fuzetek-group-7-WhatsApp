@@ -319,6 +319,7 @@ public:
         }
         User newuser(uname,pass,phone);
         users.push_back(newuser);
+        cout<<"new user registered!"<<endl;
     }
     
     void login() {
