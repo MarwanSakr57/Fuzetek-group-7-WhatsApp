@@ -124,8 +124,7 @@ public:
 
     string getStatus() const
     {
-        // TODO: Implement getter
-        return "";
+        return status;
     }
 
     Message *getReplyTo() const
@@ -136,7 +135,7 @@ public:
 
     void setStatus(string newStatus)
     {
-        // TODO: Implement setter
+        status = newStatus;
     }
 
     void setReplyTo(Message *msg)
