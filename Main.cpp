@@ -355,14 +355,9 @@ public:
     }
 
     void logout() {
-        if (isLoggedIn()){
             users[currentUserIndex].setStatus("Offline");
-            cout<<getCurrentUsername()<<" Logged out";
+            cout<<getCurrentUsername()<<" Logged out successfully";
             currentUserIndex=-1;
-        }
-        else{
-            ("No user is currently logged in");
-        }
     }
 
     void run() {
