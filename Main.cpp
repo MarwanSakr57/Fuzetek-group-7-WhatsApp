@@ -257,7 +257,8 @@ private:
     }
 
     bool isLoggedIn() const {
-        return currentUserIndex!=-1;
+        // TODO: Implement login check
+        return false;
     }
 
     string getCurrentUsername() const {
