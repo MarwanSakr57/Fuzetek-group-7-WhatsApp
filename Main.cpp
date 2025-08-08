@@ -17,6 +17,7 @@ private:
     string lastSeen;
 
 public:
+
     User()
     {
         username = "";
@@ -69,14 +70,13 @@ public:
         lastSeen = ctime(&now);
     }
 
-    bool checkPassword(string pwd) const
-    {
-        // TODO: Implement password check
-        return false;
+    bool checkPassword(string pwd) const {
+        return password == pwd;
     }
 
     void changePassword(string newPwd)
     {
+
         // TODO: Implement password change
     }
 };
@@ -91,14 +91,14 @@ private:
     string content;
     string timestamp;
     string status;
-    Message *replyTo;
+    Message* replyTo;
+
 
 public:
     Message()
     {
         // TODO: Implement default constructor
     }
-
     Message(string sndr, string cntnt)
     {
         // TODO: Implement parameterized constructor
@@ -110,51 +110,44 @@ public:
         return "";
     }
 
-    string getSender() const
-    {
+    string getSender() const {
         // TODO: Implement getter
         return "";
     }
 
-    string getTimestamp() const
-    {
+
+    string getTimestamp() const {
         // TODO: Implement getter
         return "";
     }
 
-    string getStatus() const
-    {
-        return status;
+    string getStatus() const {
+        // TODO: Implement getter
+        return "";
     }
 
-    Message *getReplyTo() const
-    {
+    Message* getReplyTo() const {
         // TODO: Implement getter
         return nullptr;
     }
 
-    void setStatus(string newStatus)
-    {
-        status = newStatus;
-    }
-
-    void setReplyTo(Message *msg)
-    {
+    void setStatus(string newStatus) {
         // TODO: Implement setter
     }
 
-    void updateTimestamp()
-    {
+    void setReplyTo(Message* msg) {
+        // TODO: Implement setter
+    }
+
+    void updateTimestamp() {
         // TODO: Implement timestamp update
     }
 
-    void display() const
-    {
+    void display() const {
         // TODO: Implement message display
     }
 
-    void addEmoji(string emojiCode)
-    {
+    void addEmoji(string emojiCode) {
         // TODO: Implement emoji support
     }
 };
@@ -175,6 +168,7 @@ public:
         // TODO: Implement default constructor
     }
 
+
     Chat(vector<string> users, string name)
     {
         // TODO: Implement parameterized constructor
@@ -187,23 +181,21 @@ public:
 
     bool deleteMessage(int index, const string &username)
     {
+
         // TODO: Implement message deletion
         return false;
     }
 
-    virtual void displayChat() const
-    {
+    virtual void displayChat() const {
         // TODO: Implement chat display
     }
 
-    vector<Message> searchMessages(string keyword) const
-    {
+    vector<Message> searchMessages(string keyword) const {
         // TODO: Implement message search
         return {};
     }
 
-    void exportToFile(const string &filename) const
-    {
+    void exportToFile(const string& filename) const {
         // TODO: Implement export to file
     }
 };
@@ -223,13 +215,11 @@ public:
         // TODO: Implement constructor
     }
 
-    void displayChat() const override
-    {
+    void displayChat() const override {
         // TODO: Implement private chat display
     }
 
-    void showTypingIndicator(const string &username) const
-    {
+    void showTypingIndicator(const string& username) const {
         // TODO: Implement typing indicator
     }
 };
@@ -249,41 +239,34 @@ public:
         // TODO: Implement constructor
     }
 
-    void addAdmin(string newAdmin)
-    {
+    void addAdmin(string newAdmin) {
         // TODO: Implement add admin
     }
 
-    bool removeParticipant(const string &admin, const string &userToRemove)
-    {
+    bool removeParticipant(const string& admin, const string& userToRemove) {
         // TODO: Implement remove participant
         return false;
     }
 
-    bool isAdmin(string username) const
-    {
+    bool isAdmin(string username) const {
         // TODO: Implement admin check
         return false;
     }
 
-    bool isParticipant(string username) const
-    {
+    bool isParticipant(string username) const {
         // TODO: Implement participant check
         return false;
     }
 
-    void setDescription(string desc)
-    {
+    void setDescription(string desc) {
         // TODO: Implement set description
     }
 
-    void displayChat() const override
-    {
+    void displayChat() const override {
         // TODO: Implement group chat display
     }
 
-    void sendJoinRequest(const string &username)
-    {
+    void sendJoinRequest(const string& username) {
         // TODO: Implement join request
     }
 };
@@ -298,20 +281,16 @@ private:
     vector<Chat *> chats;
     int currentUserIndex;
 
-    int findUserIndex(string username) const
-    {
+    int findUserIndex(string username) const {
         // TODO: Implement user search
         return -1;
     }
 
-    bool isLoggedIn() const
-    {
-        // TODO: Implement login check
-        return false;
+    bool isLoggedIn() const {
+        return currentUserIndex != -1;
     }
 
-    string getCurrentUsername() const
-    {
+    string getCurrentUsername() const {
         // TODO: Implement get current user
         return "";
     }
@@ -319,8 +298,8 @@ private:
 public:
     WhatsApp() : currentUserIndex(-1) {}
 
-    void signUp()
-    {
+
+    void signUp() {
         string uname;
         string pass;
         string phone;
@@ -385,74 +364,67 @@ public:
         cout << "new user registered!" << endl;
     }
 
-    void login()
-    {
 
-        // b3d my3ml login hnset l status b Online
-        currentUserIndex = i; // hshof l user index
-        users[currentUserIndex].setStatus("Online");
-        cout << "Welcome " << users[currentUserIndex].getUsername() << "! You are now Online.\n";
+    void login() {
+        string username, password;
+        cin.ignore();
+        cout << "Enter your username: "<< endl;
+        getline(cin, username);
+        cout << "Enter your password: "<< endl;
+        getline(cin, password);
+        for (int i=0; i<users.size(); ++i){
+            if (users[i].checkPassword(password)){
+                currentUserIndex = i;
+                users[i].setStatus("Online");
+                cout << "Login successful !" << username << endl;
+                return;
+            }
+            else {
+                cout << "Incorrect password. Please try again." << endl;
+                return;
+            }
+        }
+        cout << "Username not found.";
     }
 
-    void startPrivateChat()
-    {
+    void startPrivateChat() {
         // TODO: Implement private chat creation
     }
 
-    void createGroup()
-    {
+    void createGroup() {
         // TODO: Implement group creation
     }
 
-    void viewChats() const
-    {
+    void viewChats() const {
         // TODO: Implement chat viewing
     }
 
-    void logout()
-    {
-
-        // After logging out hnset l status to be Offline.
-        if (isLoggedIn())
-        {
-            users[currentUserIndex].updateLastSeen();
+    void logout() {
             users[currentUserIndex].setStatus("Offline");
-            cout << "Goodbye! Last seen updated to: " << users[currentUserIndex].getLastSeen();
-            currentUserIndex = -1;
-        }
+            users[currentUserIndex].updateLastSeen();
+            cout<<getCurrentUsername()<<" Logged out successfully";
+            currentUserIndex=-1;
     }
 
-    void run()
-    {
-        while (true)
-        {
-            if (!isLoggedIn())
-            {
+    void run() {
+        while (true) {
+            if (!isLoggedIn()) {
                 cout << "\n1. Login\n2. Sign Up\n3. Exit\nChoice: ";
                 int choice;
                 cin >> choice;
-
-                if (choice == 1)
-                    login();
-                else if (choice == 2)
-                    signUp();
-                else if (choice == 3)
-                    break;
+                if (choice == 1) login();
+                else if (choice == 2) signUp();
+                else if (choice == 3) break;
             }
             else
             {
                 cout << "\n1. Start Private Chat\n2. Create Group\n3. View Chats\n4. Logout\nChoice: ";
                 int choice;
                 cin >> choice;
-
-                if (choice == 1)
-                    startPrivateChat();
-                else if (choice == 2)
-                    createGroup();
-                else if (choice == 3)
-                    viewChats();
-                else if (choice == 4)
-                    logout();
+                if (choice == 1) startPrivateChat();
+                else if (choice == 2) createGroup();
+                else if (choice == 3) viewChats();
+                else if (choice == 4) logout();
             }
         }
     }
