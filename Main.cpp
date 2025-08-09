@@ -186,7 +186,13 @@ public:
         chatName = name;
         messages = {};
     }
+    const vector<string>& getParticipants() const {
+        return participants;
+    }
 
+    string getChatName() const {
+        return chatName;
+    }
     void addMessage(const Message &msg)
     {
         messages.push_back(msg);
@@ -447,7 +453,51 @@ public:
     }
 
     void viewChats() const {
-        // TODO: Implement chat viewing
+        string currentUser = getCurrentUsername();
+        vector<int> userChatIndices;
+
+        cout << "Your Chats:" << endl;
+        for (int i = 0; i < chats.size(); ++i) {
+            Chat* chat = chats[i];
+            bool isParticipant = false;
+            for (const string& participant : chat->getParticipants()) {
+                if (participant == currentUser) {
+                    isParticipant = true;
+                    break;
+                }
+            }
+            if (isParticipant) {
+                cout << userChatIndices.size() + 1 << ". " << chat->getChatName() << endl;
+                userChatIndices.push_back(i);
+            }
+        }
+
+        if (userChatIndices.empty()) {
+            cout << "No chats found." << endl;
+            return;
+        }
+
+        cout << "Enter chat number to open (or 0 to go back): ";
+        int choice;
+        cin >> choice;
+        if (choice < 1 || choice > userChatIndices.size()) return;
+
+        int chatIndex = userChatIndices[choice - 1];
+        Chat* selectedChat = chats[chatIndex];
+
+        // Chat loop
+        cin.ignore();
+        cout << "Type your message: "<<endl;
+        
+        while(true){
+        string messageText;
+        getline(cin, messageText);
+        if(messageText =="q") break;
+        if(messageText =="d") {selectedChat->displayChat();continue;}
+        Message msg=Message(currentUser,messageText);
+        selectedChat->addMessage(msg);
+        cout<<"type another message (or 'd' to display chat or 'q' to exit chat)"<<endl;
+        }
     }
 
     void logout() {
