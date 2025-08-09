@@ -143,10 +143,7 @@ public:
 
     void updateTimestamp() {
         time_t now = time(0);
-        tm* ltm = localtime(&now);
-        char buf[20];
-        strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", ltm);
-        timestamp = buf;
+        timestamp = ctime(&now);
     }
 
     void display() const {
@@ -177,29 +174,40 @@ protected:
 public:
     Chat()
     {
-        // TODO: Implement default constructor
+        participants={};
+        messages={};
+        chatName="";
     }
 
 
     Chat(vector<string> users, string name)
-    {
-        // TODO: Implement parameterized constructor
+    {   
+        participants = users;
+        chatName = name;
+        messages = {};
     }
 
     void addMessage(const Message &msg)
     {
-        // TODO: Implement message addition
+        messages.push_back(msg);
     }
 
     bool deleteMessage(int index, const string &username)
     {
 
-        // TODO: Implement message deletion
+      if(messages[index].getSender()==username){
+        cout<<"Message : "<<messages[index].getContent()<<" deleted successfuly !"<<endl;
+        messages.erase(messages.begin()+index);
+        return true;
+      }
+        cout<<"user can only delete their messages"<<endl;
         return false;
     }
 
     virtual void displayChat() const {
-        // TODO: Implement chat display
+        for (Message msg:messages){
+            msg.display();
+        }
     }
 
     vector<Message> searchMessages(string keyword) const {
@@ -222,18 +230,14 @@ private:
     string user2;
 
 public:
-    PrivateChat(string u1, string u2) : user1(u1), user2(u2) {
-        participants.push_back(u1);
-        participants.push_back(u2);
-        chatName = u1 + " & " + u2;
-    }
 
+    PrivateChat(string u1, string u2)
+        : Chat({u1, u2}, u1 + " & " + u2), user1(u1), user2(u2) { }
+    
     void displayChat() const override {
         cout << "Private Chat between " << user1 << " and " << user2 << endl;
         cout << "------------------------------------" << endl;
-        for (const auto& msg : messages) {
-            msg.display();
-        }
+        Chat::displayChat();
         cout << "------------------------------------" << endl;
     }
 
@@ -300,7 +304,11 @@ private:
     int currentUserIndex;
 
     int findUserIndex(string username) const {
-        // TODO: Implement user search
+        for(int i=0;i<users.size();i++){
+            if(users[i].getUsername()==username){
+                return i;
+            }
+        }
         return -1;
     }
 
@@ -309,8 +317,7 @@ private:
     }
 
     string getCurrentUsername() const {
-        // TODO: Implement get current user
-        return "";
+        return users[currentUserIndex].getUsername();
     }
 
 public:
@@ -391,14 +398,14 @@ public:
         cout << "Enter your password: "<< endl;
         getline(cin, password);
         for (int i=0; i<users.size(); ++i){
-            if (users[i].checkPassword(password)){
+            if (users[i].getUsername()==username&&users[i].checkPassword(password)){ //added check for correct username
                 currentUserIndex = i;
                 users[i].setStatus("Online");
-                cout << "Login successful !" << username << endl;
+                cout << "Login successful " << username <<" !"<< endl;
                 return;
             }
             else {
-                cout << "Incorrect password. Please try again." << endl;
+                cout << "Incorrect username or password . Please try again." << endl;
                 return;
             }
         }
@@ -406,7 +413,33 @@ public:
     }
 
     void startPrivateChat() {
-        // TODO: Implement private chat creation
+        string reciepient;
+        cout<<"Enter reciepient name :"<<endl;
+        cin.ignore();
+        getline(cin,reciepient);
+        int reciepientIndex=findUserIndex(reciepient);
+
+        if(reciepientIndex==-1){
+            cout<<"user not found"<<endl;
+            return;
+        }
+
+        string currentUser=getCurrentUsername();
+        PrivateChat* chat= new PrivateChat(currentUser,reciepient);
+        chats.push_back(chat);
+
+        cout << "Chat started with "<<reciepient<<" !" << endl;
+        cout << "Type your message: "<<endl;
+        
+        while(true){
+        string messageText;
+        getline(cin, messageText);
+        if(messageText =="q") break;
+        Message msg=Message(currentUser,messageText);
+        chat->addMessage(msg);
+        if(messageText =="d") chat->displayChat();
+        cout<<"type another message or 'd' to display chat or 'q' to exit chat"<<endl;
+        }
     }
 
     void createGroup() {
