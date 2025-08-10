@@ -403,19 +403,16 @@ public:
         getline(cin, username);
         cout << "Enter your password: "<< endl;
         getline(cin, password);
+
         for (int i=0; i<users.size(); ++i){
-            if (users[i].getUsername()==username&&users[i].checkPassword(password)){ //added check for correct username
+            if (users[i].getUsername()==username && users[i].checkPassword(password)){
                 currentUserIndex = i;
                 users[i].setStatus("Online");
-                cout << "Login successful " << username <<" !"<< endl;
-                return;
-            }
-            else {
-                cout << "Incorrect username or password . Please try again." << endl;
+                cout << "Login successful " << username <<"!"<< endl;
                 return;
             }
         }
-        cout << "Username not found.";
+        cout << "Incorrect username or password. Please try again." << endl;
     }
 
     void startPrivateChat() {
