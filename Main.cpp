@@ -438,9 +438,9 @@ public:
         string messageText;
         getline(cin, messageText);
         if(messageText =="q") break;
+        if(messageText =="d") {selectedChat->displayChat();continue;}
         Message msg=Message(currentUser,messageText);
         chat->addMessage(msg);
-        if(messageText =="d") chat->displayChat();
         cout<<"type another message or 'd' to display chat or 'q' to exit chat"<<endl;
         }
     }
