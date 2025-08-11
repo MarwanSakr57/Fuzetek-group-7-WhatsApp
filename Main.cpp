@@ -103,7 +103,7 @@ public:
         replyTo = nullptr;
         updateTimestamp();
     }
-    
+
     Message(string sndr, string cntnt) {
         sender = sndr;
         content = cntnt;
@@ -111,7 +111,7 @@ public:
         replyTo = nullptr;
         updateTimestamp();
     }
-    
+
     string getContent() const {
         return content;
     }
@@ -152,6 +152,12 @@ public:
         if (replyTo != nullptr) {
             cout << " (reply to: " << replyTo->getContent() << ")";
         }
+        if (status == "Sent") {
+            const_cast<string&>(status) = "Delivered";
+        }
+        else if (status == "Delivered") {
+            const_cast<string&>(status) = "Seen";
+        }
         cout << " [" << status << "]";
         cout << endl;
     }
@@ -181,7 +187,7 @@ public:
 
 
     Chat(vector<string> users, string name)
-    {   
+    {
         participants = users;
         chatName = name;
         messages = {};
@@ -239,7 +245,7 @@ public:
 
     PrivateChat(string u1, string u2)
         : Chat({u1, u2}, u1 + " & " + u2), user1(u1), user2(u2) { }
-    
+
     void displayChat() const override {
         cout << "Private Chat between " << user1 << " and " << user2 << endl;
         cout << "------------------------------------" << endl;
@@ -436,7 +442,7 @@ public:
 
         cout << "Chat started with "<<reciepient<<" !" << endl;
         cout << "Type your message: "<<endl;
-        
+
         while(true){
         string messageText;
         getline(cin, messageText);
@@ -488,7 +494,7 @@ public:
         // Chat loop
         cin.ignore();
         cout << "Type your message: "<<endl;
-        
+
         while(true){
         string messageText;
         getline(cin, messageText);
