@@ -226,7 +226,7 @@ public:
     }
 
     void exportToFile(const string& filename) const {
-       ofstream outputFile(filename);
+       ofstream outputFile(filename+".txt");
     if (outputFile.is_open()) {
         for (const Message& msg : messages) {
             outputFile << "[" << msg.getTimestamp() << "] ";
@@ -451,24 +451,30 @@ public:
         chats.push_back(chat);
         
         cout << "Chat started with "<<reciepient<<" !" << endl;
-        cout << "Type your message: "<<endl;
         
         while(true){
+        cout<<"type your message (or 'o' for options)"<<endl;
         string messageText;
         getline(cin, messageText);
-        if(messageText =="q") break;
-        if(messageText =="d") {chat->displayChat();continue;}
-        if(messageText =="e") {
-            string filename;
-            cout << "Enter filename to export chat: ";
-            getline(cin, filename);
-            chat->exportToFile(filename);
-            cout << "Chat exported to " << filename << endl;
-            continue;
+        if(messageText =="o") {
+            cout<<"\n1. Exit chat\n2. Display chat\n3. Export Chat \n ";
+            string messageText;
+            getline(cin, messageText);
+            if(messageText =="1") break;
+            if(messageText =="2") {chat->displayChat();continue;}
+            if(messageText =="3") {
+                string filename;
+                cout << "Enter filename to export chat: ";
+                getline(cin, filename);
+                chat->exportToFile(filename);
+                cout << "Chat exported to " << filename << endl;
+                continue;
         }
+        }
+
         Message msg=Message(currentUser,messageText);
         chat->addMessage(msg);
-        cout<<"type another message ('or 'd' to display chat, 'e' to export chat, or 'q' to exit chat')"<<endl;
+        
         }
     }
 
@@ -511,24 +517,28 @@ public:
 
         // Chat loop
         cin.ignore();
-        cout << "Type your message: "<<endl;
-        
         while(true){
+        cout<<"type your message: (or 'o' for options)"<<endl;
         string messageText;
         getline(cin, messageText);
-        if(messageText =="q") break;
-        if(messageText =="d") {selectedChat->displayChat();continue;}
-        if(messageText =="e") {
-            string filename;
-            cout << "Enter filename to export chat: ";
-            getline(cin, filename);
-            selectedChat->exportToFile(filename);
-            cout << "Chat exported to " << filename << endl;
-            continue;
+                if(messageText =="o") {
+            cout<<"\n1. Exit chat\n2. Display chat\n3. Export Chat \n ";
+            string messageText;
+            getline(cin, messageText);
+            if(messageText =="1") break;
+            if(messageText =="2") {selectedChat->displayChat();continue;}
+            if(messageText =="3") {
+                string filename;
+                cout << "Enter filename to export chat: ";
+                getline(cin, filename);
+                selectedChat->exportToFile(filename);
+                cout << "Chat exported to " << filename << endl;
+                continue;
+        }
         }
         Message msg=Message(currentUser,messageText);
         selectedChat->addMessage(msg);
-        cout<<"type another message (or 'd' to display chat, 'e' to export chat, or 'q' to exit chat)"<<endl;
+        
         }
     }
 
