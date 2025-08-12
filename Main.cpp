@@ -152,12 +152,6 @@ public:
         if (replyTo != nullptr) {
             cout << " (reply to: " << replyTo->getContent() << ")";
         }
-        if (status == "Sent") {
-            const_cast<string&>(status) = "Delivered";
-        }
-        else if (status == "Delivered") {
-            const_cast<string&>(status) = "Seen";
-        }
         cout << " [" << status << "]";
         cout << endl;
     }
@@ -165,6 +159,9 @@ public:
     void addEmoji(string emojiCode) {
         content += " " + emojiCode;
     }
+
+    void markDelivered() { status = "Delivered"; }
+    void markSeen() { status = "Seen"; }
 };
 
 // ========================
@@ -195,7 +192,9 @@ public:
     const vector<string>& getParticipants() const {
         return participants;
     }
-
+    vector<Message>& getMessages() {
+        return messages;
+    }
     string getChatName() const {
         return chatName;
     }
@@ -409,21 +408,17 @@ public:
         getline(cin, username);
         cout << "Enter your password: "<< endl;
         getline(cin, password);
+
         for (int i=0; i<users.size(); ++i){
-            if (users[i].getUsername()==username&&users[i].checkPassword(password)){ //added check for correct username
+            if (users[i].getUsername()==username && users[i].checkPassword(password)){
                 currentUserIndex = i;
                 users[i].setStatus("Online");
-                cout << "Login successful " << username <<" !"<< endl;
-                return;
-            }
-            else {
-                cout << "Incorrect username or password . Please try again." << endl;
+                cout << "Login successful " << username <<"!"<< endl;
                 return;
             }
         }
-        cout << "Username not found.";
+        cout << "Incorrect username or password. Please try again." << endl;
     }
-
     void startPrivateChat() {
         string reciepient;
         cout<<"Enter reciepient name :"<<endl;
@@ -447,9 +442,10 @@ public:
         string messageText;
         getline(cin, messageText);
         if(messageText =="q") break;
+        if(messageText =="d") {chat->displayChat();continue;}
         Message msg=Message(currentUser,messageText);
+        msg.markDelivered();
         chat->addMessage(msg);
-        if(messageText =="d") chat->displayChat();
         cout<<"type another message or 'd' to display chat or 'q' to exit chat"<<endl;
         }
     }
@@ -491,6 +487,12 @@ public:
         int chatIndex = userChatIndices[choice - 1];
         Chat* selectedChat = chats[chatIndex];
 
+        for (Message& msg : selectedChat->getMessages()) {
+            if (msg.getSender() != currentUser && msg.getStatus() == "Delivered") {
+                msg.markSeen();
+            }
+        }
+
         // Chat loop
         cin.ignore();
         cout << "Type your message: "<<endl;
@@ -501,6 +503,7 @@ public:
         if(messageText =="q") break;
         if(messageText =="d") {selectedChat->displayChat();continue;}
         Message msg=Message(currentUser,messageText);
+        msg.markDelivered();
         selectedChat->addMessage(msg);
         cout<<"type another message (or 'd' to display chat or 'q' to exit chat)"<<endl;
         }
