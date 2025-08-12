@@ -174,18 +174,18 @@ protected:
 public:
     Chat()
     {
-        participants={};
-        messages={};
-        chatName="";
+        participants = {};
+        messages = {};
+        chatName = "";
     }
 
-
     Chat(vector<string> users, string name)
-    {   
+    {
         participants = users;
         chatName = name;
         messages = {};
     }
+
     const vector<string>& getParticipants() const {
         return participants;
     }
@@ -193,6 +193,7 @@ public:
     string getChatName() const {
         return chatName;
     }
+
     void addMessage(const Message &msg)
     {
         messages.push_back(msg);
@@ -200,31 +201,36 @@ public:
 
     bool deleteMessage(int index, const string &username)
     {
-
-      if(messages[index].getSender()==username){
-        cout<<"Message : "<<messages[index].getContent()<<" deleted successfuly !"<<endl;
-        messages.erase(messages.begin()+index);
-        return true;
-      }
-        cout<<"user can only delete their messages"<<endl;
+        if (messages[index].getSender() == username) {
+            cout << "Message : " << messages[index].getContent() << " deleted successfully !" << endl;
+            messages.erase(messages.begin() + index);
+            return true;
+        }
+        cout << "User can only delete their messages" << endl;
         return false;
     }
 
     virtual void displayChat() const {
-        for (Message msg:messages){
+        for (const Message &msg : messages) {
             msg.display();
         }
     }
 
     vector<Message> searchMessages(string keyword) const {
-        // TODO: Implement message search
-        return {};
+        vector<Message> results;
+        for (const Message &msg : messages) {
+            if (msg.getContent().find(keyword) != string::npos) {
+                results.push_back(msg);
+            }
+        }
+        return results;
     }
 
     void exportToFile(const string& filename) const {
         // TODO: Implement export to file
     }
 };
+
 
 // ========================
 //     PRIVATE CHAT CLASS
