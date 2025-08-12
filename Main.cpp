@@ -282,7 +282,26 @@ private:
 public:
     GroupChat(vector<string> users, string name, string creator)
     {
-        // TODO: Implement constructor
+        // byt2kd en l creator mn dmn l nas l fl list
+        bool found = false;
+        for (int i = 0; i < participants.size(); i++)
+        {
+            if (participants[i] == creator)
+            {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+        {
+            participants.push_back(creator);
+        }
+
+        // hndy l l creator l admin access
+        admins.push_back(creator);
+
+        // default description
+        description = "";
     }
 
     void addAdmin(string newAdmin)
@@ -300,25 +319,51 @@ public:
 
     bool removeParticipant(const string &admin, const string &userToRemove)
     {
-        // TODO: Implement remove participant
+        if (!isAdmin(admin))
+        {
+            cout << admin << " is not an admin.\n";
+            return false;
+        }
+        for (int i = 0; i < participants.size(); i++)
+        {
+            if (participants[i] == userToRemove)
+            {
+                participants.erase(participants.begin() + i);
+                cout << userToRemove << " removed from group.\n";
+                return true;
+            }
+        }
+        cout << userToRemove << " not found in group.\n";
         return false;
     }
 
     bool isAdmin(string username) const
     {
-        // TODO: Implement admin check
+        for (int i = 0; i < admins.size(); i++)
+        {
+            if (admins[i] == username)
+            {
+                return true;
+            }
+        }
         return false;
     }
 
     bool isParticipant(string username) const
     {
-        // TODO: Implement participant check
+        for (int i = 0; i < participants.size(); i++)
+        {
+            if (participants[i] == username)
+            {
+                return true;
+            }
+        }
         return false;
     }
 
     void setDescription(string desc)
     {
-        // TODO: Implement set description
+        description = desc;
     }
     void sendGroupMessage(const string &sender, const string &text)
     {
@@ -347,7 +392,7 @@ public:
 
     void sendJoinRequest(const string &username)
     {
-        // TODO: Implement join request
+        cout << username << " requested to join group \"" << chatName << "\".\n";
     }
 };
 
