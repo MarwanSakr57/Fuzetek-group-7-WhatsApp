@@ -104,7 +104,7 @@ public:
         replyTo = nullptr;
         updateTimestamp();
     }
-    
+
     Message(string sndr, string cntnt) {
         sender = sndr;
         content = cntnt;
@@ -112,7 +112,7 @@ public:
         replyTo = nullptr;
         updateTimestamp();
     }
-    
+
     string getContent() const {
         return content;
     }
@@ -163,6 +163,9 @@ public:
     void addEmoji(string emojiCode) {
         content += " " + emojiCode;
     }
+
+    void markDelivered() { status = "Delivered"; }
+    void markSeen() { status = "Seen"; }
 };
 
 // ========================
@@ -185,7 +188,7 @@ public:
 
 
     Chat(vector<string> users, string name)
-    {   
+    {
         participants = users;
         chatName = name;
         messages = {};
@@ -193,7 +196,9 @@ public:
     const vector<string>& getParticipants() const {
         return participants;
     }
-
+    vector<Message>& getMessages() {
+        return messages;
+    }
     string getChatName() const {
         return chatName;
     }
@@ -258,7 +263,7 @@ public:
 
     PrivateChat(string u1, string u2)
         : Chat({u1, u2}, u1 + " & " + u2), user1(u1), user2(u2) { }
-    
+
     void displayChat() const override {
         cout << "Private Chat between " << user1 << " and " << user2 << endl;
         cout << "------------------------------------" << endl;
@@ -433,7 +438,6 @@ public:
         }
         cout << "Incorrect username or password. Please try again." << endl;
     }
-
     void startPrivateChat() {
         string reciepient;
         cout<<"Enter reciepient name :"<<endl;
@@ -451,7 +455,6 @@ public:
         chats.push_back(chat);
         
         cout << "Chat started with "<<reciepient<<" !" << endl;
-        
         while(true){
         cout<<"type your message (or 'o' for options)"<<endl;
         string messageText;
@@ -471,10 +474,9 @@ public:
                 continue;
         }
         }
-
         Message msg=Message(currentUser,messageText);
+        msg.markDelivered();
         chat->addMessage(msg);
-        
         }
     }
 
@@ -515,6 +517,12 @@ public:
         int chatIndex = userChatIndices[choice - 1];
         Chat* selectedChat = chats[chatIndex];
 
+        for (Message& msg : selectedChat->getMessages()) {
+            if (msg.getSender() != currentUser && msg.getStatus() == "Delivered") {
+                msg.markSeen();
+            }
+        }
+
         // Chat loop
         cin.ignore();
         while(true){
@@ -537,6 +545,7 @@ public:
         }
         }
         Message msg=Message(currentUser,messageText);
+        msg.markDelivered();
         selectedChat->addMessage(msg);
         
         }
