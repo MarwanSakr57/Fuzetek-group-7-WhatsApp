@@ -105,8 +105,6 @@ public:
         updateTimestamp();
     }
 
-    Message(string sndr, string cntnt) {
-
     Message(string sndr, string cntnt)
     {
         sender = sndr;
@@ -200,7 +198,6 @@ public:
     }
 
     Chat(vector<string> users, string name)
-    {
     {
         participants = users;
         chatName = name;
@@ -482,6 +479,22 @@ public:
     {
         cout << username << " requested to join group \"" << chatName << "\".\n";
     }
+
+    void addAdmin(const string& requester, const string& newAdmin)
+    {
+        if (!isCreator(requester))
+        {
+            cout << "Only creator can add admins.\n";
+            return;
+        }
+        if (isParticipant(newAdmin) && !isAdmin(newAdmin))
+        {
+            admins.push_back(newAdmin);
+            cout << newAdmin << " promoted to admin.\n";
+            return;
+        }
+        cout << "Cannot add admin.\n";
+    }
 };
 
 // ========================
@@ -593,18 +606,14 @@ public:
         cout << "Enter your password: "<< endl;
         getline(cin, password);
 
-
         for (int i=0; i<users.size(); ++i){
-            if (users[i].getUsername()==username && users[i].checkPassword(password)){
             if (users[i].getUsername()==username && users[i].checkPassword(password)){
                 currentUserIndex = i;
                 users[i].setStatus("Online");
                 cout << "Login successful " << username <<"!"<< endl;
-                cout << "Login successful " << username <<"!"<< endl;
                 return;
             }
         }
-        cout << "Incorrect username or password. Please try again." << endl;
         cout << "Incorrect username or password. Please try again." << endl;
     }
 
@@ -719,37 +728,94 @@ public:
         int chatIndex = userChatIndices[choice - 1];
         Chat* selectedChat = chats[chatIndex];
 
+        // Mark messages as seen
         for (Message& msg : selectedChat->getMessages()) {
             if (msg.getSender() != currentUser && msg.getStatus() == "Delivered") {
                 msg.markSeen();
             }
         }
 
-        // Chat loop
+        // Check if group chat
+        GroupChat* group = dynamic_cast<GroupChat*>(selectedChat);
+        bool isGroup = group != nullptr;
+
         cin.ignore();
         while(true){
-        cout<<"type your message: (or 'o' for options)"<<endl;
-        string messageText;
-        getline(cin, messageText);
-                if(messageText =="o") {
-            cout<<"\n1. Exit chat\n2. Display chat\n3. Export Chat \n ";
+            cout<<"type your message: (or 'o' for options)"<<endl;
             string messageText;
             getline(cin, messageText);
-            if(messageText =="1") break;
-            if(messageText =="2") {selectedChat->displayChat();continue;}
-            if(messageText =="3") {
-                string filename;
-                cout << "Enter filename to export chat: ";
-                getline(cin, filename);
-                selectedChat->exportToFile(filename);
-                cout << "Chat exported to " << filename << endl;
+
+            if(messageText =="o") {
+                cout << "\n1. Exit chat\n2. Display chat\n3. Export Chat";
+                if (isGroup && (group->isAdmin(currentUser) || group->isCreator(currentUser))) {
+                    cout << "\n4. Delete message";
+                    cout << "\n5. Add participant";
+                    cout << "\n6. Remove participant";
+                }
+                if (isGroup && group->isCreator(currentUser)) {
+                    cout << "\n7. Add admin";
+                    cout << "\n8. Remove admin";
+                }
+                cout << "\nChoice: ";
+                string option;
+                getline(cin, option);
+
+                if(option =="1") break;
+                if(option =="2") {selectedChat->displayChat();continue;}
+                if(option =="3") {
+                    string filename;
+                    cout << "Enter filename to export chat: ";
+                    getline(cin, filename);
+                    selectedChat->exportToFile(filename);
+                    cout << "Chat exported to " << filename << endl;
+                    continue;
+                }
+                if(isGroup && (group->isAdmin(currentUser) || group->isCreator(currentUser))) {
+                    if(option =="4") {
+                        cout << "Enter message index to delete: ";
+                        int idx;
+                        cin >> idx;
+                        cin.ignore();
+                        group->deleteMessage(idx, currentUser);
+                        continue;
+                    }
+                    if(option =="5") {
+                        cout << "Enter username to add: ";
+                        string uname;
+                        getline(cin, uname);
+                        group->addParticipant(currentUser, uname);
+                        continue;
+                    }
+                    if(option =="6") {
+                        cout << "Enter username to remove: ";
+                        string uname;
+                        getline(cin, uname);
+                        group->removeParticipant(currentUser, uname);
+                        continue;
+                    }
+                }
+                if(isGroup && group->isCreator(currentUser)) {
+                    if(option =="7") {
+                        cout << "Enter username to promote to admin: ";
+                        string uname;
+                        getline(cin, uname);
+                        group->addAdmin(currentUser, uname);
+                        continue;
+                    }
+                    if(option =="8") {
+                        cout << "Enter admin username to remove: ";
+                        string uname;
+                        getline(cin, uname);
+                        group->removeAdmin(currentUser, uname);
+                        continue;
+                    }
+                }
                 continue;
-        }
-        }
-        Message msg=Message(currentUser,messageText);
-        msg.markDelivered();
-        selectedChat->addMessage(msg);
-        
+            }
+
+            Message msg=Message(currentUser,messageText);
+            msg.markDelivered();
+            selectedChat->addMessage(msg);
         }
     }
 
