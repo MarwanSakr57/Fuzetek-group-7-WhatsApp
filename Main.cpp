@@ -195,6 +195,9 @@ public:
         participants = {};
         messages = {};
         chatName = "";
+        participants = {};
+        messages = {};
+        chatName = "";
     }
 
     Chat(vector<string> users, string name)
@@ -213,6 +216,7 @@ public:
     string getChatName() const {
         return chatName;
     }
+
     void addMessage(const Message &msg)
     {
         messages.push_back(msg);
@@ -239,10 +243,14 @@ public:
         }
     }
 
-    vector<Message> searchMessages(string keyword) const
-    {
-        // TODO: Implement message search
-        return {};
+    vector<Message> searchMessages(string keyword) const {
+        vector<Message> results;
+        for (const Message &msg : messages) {
+            if (msg.getContent().find(keyword) != string::npos) {
+                results.push_back(msg);
+            }
+        }
+        return results;
     }
 
     void exportToFile(const string& filename) const {
@@ -264,6 +272,7 @@ public:
     outputFile.close();
     }
 };
+
 
 // ========================
 //     PRIVATE CHAT CLASS
