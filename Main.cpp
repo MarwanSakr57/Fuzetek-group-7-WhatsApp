@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <string>
 #include <ctime>
@@ -104,6 +105,8 @@ public:
         updateTimestamp();
     }
 
+    Message(string sndr, string cntnt) {
+
     Message(string sndr, string cntnt)
     {
         sender = sndr;
@@ -152,6 +155,9 @@ public:
     {
         time_t now = time(0);
         timestamp = ctime(&now);
+        if (!timestamp.empty() && timestamp.back() == '\n') {
+        timestamp.pop_back(); // this removes newline char in the end so displaychat() has correct formatting
+    }
     }
 
     void display() const
@@ -170,6 +176,9 @@ public:
     {
         content += " " + emojiCode;
     }
+
+    void markDelivered() { status = "Delivered"; }
+    void markSeen() { status = "Seen"; }
 };
 
 // ========================
@@ -192,6 +201,7 @@ public:
 
     Chat(vector<string> users, string name)
     {
+    {
         participants = users;
         chatName = name;
         messages = {};
@@ -200,9 +210,10 @@ public:
     {
         return participants;
     }
-
-    string getChatName() const
-    {
+    vector<Message>& getMessages() {
+        return messages;
+    }
+    string getChatName() const {
         return chatName;
     }
     void addMessage(const Message &msg)
@@ -237,9 +248,23 @@ public:
         return {};
     }
 
-    void exportToFile(const string &filename) const
-    {
-        // TODO: Implement export to file
+    void exportToFile(const string& filename) const {
+       ofstream outputFile(filename+".txt");
+    if (outputFile.is_open()) {
+        for (const Message& msg : messages) {
+            outputFile << "[" << msg.getTimestamp() << "] ";
+            outputFile << msg.getSender() << ": " << msg.getContent();
+            if (msg.getReplyTo() != nullptr) {
+                outputFile << " (reply to: " << msg.getReplyTo()->getContent() << ")";
+            }
+            outputFile << " [" << msg.getStatus() << "]";
+            outputFile << endl;
+        }
+    } else {
+        // Handle error, e.g., print an error message
+        std::cerr << "Error opening file!" << std::endl;
+    }
+    outputFile.close();
     }
 };
 
@@ -254,10 +279,9 @@ private:
 
 public:
     PrivateChat(string u1, string u2)
-        : Chat({u1, u2}, u1 + " & " + u2), user1(u1), user2(u2) {}
+        : Chat({u1, u2}, u1 + " & " + u2), user1(u1), user2(u2) { }
 
-    void displayChat() const override
-    {
+    void displayChat() const override {
         cout << "Private Chat between " << user1 << " and " << user2 << endl;
         cout << "------------------------------------" << endl;
         Chat::displayChat();
@@ -569,14 +593,18 @@ public:
         cout << "Enter your password: "<< endl;
         getline(cin, password);
 
+
         for (int i=0; i<users.size(); ++i){
+            if (users[i].getUsername()==username && users[i].checkPassword(password)){
             if (users[i].getUsername()==username && users[i].checkPassword(password)){
                 currentUserIndex = i;
                 users[i].setStatus("Online");
                 cout << "Login successful " << username <<"!"<< endl;
+                cout << "Login successful " << username <<"!"<< endl;
                 return;
             }
         }
+        cout << "Incorrect username or password. Please try again." << endl;
         cout << "Incorrect username or password. Please try again." << endl;
     }
 
@@ -597,21 +625,30 @@ public:
         string currentUser = getCurrentUsername();
         PrivateChat *chat = new PrivateChat(currentUser, reciepient);
         chats.push_back(chat);
-
-        cout << "Chat started with " << reciepient << " !" << endl;
-        cout << "Type your message: " << endl;
-
-        while (true)
-        {
+        
+        cout << "Chat started with "<<reciepient<<" !" << endl;
+        while(true){
+        cout<<"type your message (or 'o' for options)"<<endl;
+        string messageText;
+        getline(cin, messageText);
+        if(messageText =="o") {
+            cout<<"\n1. Exit chat\n2. Display chat\n3. Export Chat \n ";
             string messageText;
             getline(cin, messageText);
-            if (messageText == "q")
-                break;
-            Message msg = Message(currentUser, messageText);
-            chat->addMessage(msg);
-            if (messageText == "d")
-                chat->displayChat();
-            cout << "type another message or 'd' to display chat or 'q' to exit chat" << endl;
+            if(messageText =="1") break;
+            if(messageText =="2") {chat->displayChat();continue;}
+            if(messageText =="3") {
+                string filename;
+                cout << "Enter filename to export chat: ";
+                getline(cin, filename);
+                chat->exportToFile(filename);
+                cout << "Chat exported to " << filename << endl;
+                continue;
+        }
+        }
+        Message msg=Message(currentUser,messageText);
+        msg.markDelivered();
+        chat->addMessage(msg);
         }
     }
 
@@ -680,26 +717,39 @@ public:
             return;
 
         int chatIndex = userChatIndices[choice - 1];
-        Chat *selectedChat = chats[chatIndex];
+        Chat* selectedChat = chats[chatIndex];
+
+        for (Message& msg : selectedChat->getMessages()) {
+            if (msg.getSender() != currentUser && msg.getStatus() == "Delivered") {
+                msg.markSeen();
+            }
+        }
 
         // Chat loop
         cin.ignore();
-        cout << "Type your message: " << endl;
-
-        while (true)
-        {
+        while(true){
+        cout<<"type your message: (or 'o' for options)"<<endl;
+        string messageText;
+        getline(cin, messageText);
+                if(messageText =="o") {
+            cout<<"\n1. Exit chat\n2. Display chat\n3. Export Chat \n ";
             string messageText;
             getline(cin, messageText);
-            if (messageText == "q")
-                break;
-            if (messageText == "d")
-            {
-                selectedChat->displayChat();
+            if(messageText =="1") break;
+            if(messageText =="2") {selectedChat->displayChat();continue;}
+            if(messageText =="3") {
+                string filename;
+                cout << "Enter filename to export chat: ";
+                getline(cin, filename);
+                selectedChat->exportToFile(filename);
+                cout << "Chat exported to " << filename << endl;
                 continue;
-            }
-            Message msg = Message(currentUser, messageText);
-            selectedChat->addMessage(msg);
-            cout << "type another message (or 'd' to display chat or 'q' to exit chat)" << endl;
+        }
+        }
+        Message msg=Message(currentUser,messageText);
+        msg.markDelivered();
+        selectedChat->addMessage(msg);
+        
         }
     }
 
@@ -754,3 +804,4 @@ int main()
     whatsapp.run();
     return 0;
 }
+
