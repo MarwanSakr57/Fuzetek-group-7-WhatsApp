@@ -210,17 +210,17 @@ public:
         messages.push_back(msg);
     }
 
-    bool deleteMessage(int index, const string &username)
+    void deleteMessage(int index, const string &username)
     {
 
         if (messages[index].getSender() == username)
         {
-            cout << "Message : " << messages[index].getContent() << " deleted successfuly !" << endl;
+            cout << "Message : " << messages[index].getContent() << " Deleted successfuly !" << endl;
             messages.erase(messages.begin() + index);
-            return true;
+            return ;
         }
         cout << "user can only delete their messages" << endl;
-        return false;
+        return ;
     }
 
     virtual void displayChat() const
@@ -278,10 +278,14 @@ class GroupChat : public Chat
 private:
     vector<string> admins;
     string description;
+    string creator;
 
 public:
-    GroupChat(vector<string> users, string name, string creator)
-    {
+    GroupChat(vector<string> users, string name, string creatorName)
+    {   
+        participants=users;
+        chatName=name;
+        creator = creatorName;
         // byt2kd en l creator mn dmn l nas l fl list
         bool found = false;
         for (int i = 0; i < participants.size(); i++)
@@ -303,26 +307,62 @@ public:
         // default description
         description = "";
     }
-
-    void addAdmin(string newAdmin)
+    bool isCreator(const string& username)const
     {
-        if (isParticipant(newAdmin) && !isAdmin(newAdmin))
-        {
-            admins.push_back(newAdmin);
-            cout << newAdmin << " promoted to admin.\n";
-        }
-        else
-        {
-            cout << "Cannot add admin.\n";
-        }
+        return username==creator;
     }
 
-    bool removeParticipant(const string &admin, const string &userToRemove)
+    void removeAdmin(const string& requester, const string& adminToRemove)
     {
+        if (!isCreator(requester))
+        {
+            cout << "Only creator can remove admins.\n";
+            return ;
+        }
+        if (adminToRemove == creator)
+        {
+            cout << "Creator cannot be removed from admins.\n";
+            return ;
+        }
+        for (size_t i = 0; i < admins.size(); ++i)
+        {
+            if (admins[i] == adminToRemove)
+            {
+                admins.erase(admins.begin() + i);
+                cout << adminToRemove << " removed from admins.\n";
+                return ;
+            }
+        }
+        cout << "Admin not found.\n";
+        return ;
+    }
+    void addParticipant(const string& requester, const string& userToAdd)
+    {
+        if (!isAdmin(requester)&&!isCreator(requester))
+        {
+            cout << "Only admins can add participants.\n";
+            return ;
+        }
+        if (!isParticipant(userToAdd))
+        {
+            participants.push_back(userToAdd);
+            cout << userToAdd << " added to group.\n";
+            return ;
+        }
+        cout << "User already in group.\n";
+        return ;
+    }
+    void removeParticipant(const string &admin, const string &userToRemove)
+    {   
+        if (userToRemove==creator)
+        {
+            cout<<"Can't remove Group Creator"<<endl;
+            return;
+        }
         if (!isAdmin(admin))
         {
             cout << admin << " is not an admin.\n";
-            return false;
+            return ;
         }
         for (int i = 0; i < participants.size(); i++)
         {
@@ -330,11 +370,11 @@ public:
             {
                 participants.erase(participants.begin() + i);
                 cout << userToRemove << " removed from group.\n";
-                return true;
+                return ;
             }
         }
         cout << userToRemove << " not found in group.\n";
-        return false;
+        return ;
     }
 
     bool isAdmin(string username) const
@@ -365,26 +405,50 @@ public:
     {
         description = desc;
     }
-    void sendGroupMessage(const string &sender, const string &text)
+    void deleteMessage(int index, const string& username)
     {
-        if (!isParticipant(sender))
+        if (isAdmin(username))
         {
-            cout << "Not in group.\n";
-            return;
+            if (index >= 0 && index < messages.size())
+            {
+                cout << "Message: " << messages[index].getContent() << " deleted successfully!\n";
+                messages.erase(messages.begin() + index);
+                return ;
+            }
+            cout << "Invalid message index.\n";
+            return ;
         }
-        Message m(sender, text);
-        m.updateTimestamp();
-        m.setStatus("Sent");
-        addMessage(m);
+        cout << "Only admins can delete messages in Group.\n";
+        return ;
     }
+    // void sendGroupMessage(const string &sender, const string &text)
+    // {
+    //     if (!isParticipant(sender))
+    //     {
+    //         cout << "Not in group.\n";
+    //         return;
+    //     }
+    //     Message m(sender, text);
+    //     m.updateTimestamp();
+    //     m.setStatus("Sent");
+    //     addMessage(m);
+    // }
     void displayChat() const override
     {
         cout << "\nGroup: " << chatName << "\nAdmins: ";
-        for (auto &a : admins)
-            cout << a << " ";
+        for (size_t i = 0; i < admins.size(); ++i)
+        {
+            cout << admins[i];
+            if (i != admins.size() - 1)
+                cout << ", ";
+        }
         cout << "\nMembers: ";
-        for (auto &p : participants)
-            cout << p << " ";
+        for (size_t i = 0; i < participants.size(); ++i)
+        {
+            cout << participants[i];
+            if (i != participants.size() - 1)
+                cout << ", ";
+        }
         cout << "\nMessages:\n";
         for (auto &m : messages)
             m.display();
@@ -497,30 +561,23 @@ public:
         cout << "new user registered!" << endl;
     }
 
-    void login()
-    {
+    void login() {
         string username, password;
         cin.ignore();
-        cout << "Enter your username: " << endl;
+        cout << "Enter your username: "<< endl;
         getline(cin, username);
-        cout << "Enter your password: " << endl;
+        cout << "Enter your password: "<< endl;
         getline(cin, password);
-        for (int i = 0; i < users.size(); ++i)
-        {
-            if (users[i].getUsername() == username && users[i].checkPassword(password))
-            { // added check for correct username
+
+        for (int i=0; i<users.size(); ++i){
+            if (users[i].getUsername()==username && users[i].checkPassword(password)){
                 currentUserIndex = i;
                 users[i].setStatus("Online");
-                cout << "Login successful " << username << " !" << endl;
-                return;
-            }
-            else
-            {
-                cout << "Incorrect username or password . Please try again." << endl;
+                cout << "Login successful " << username <<"!"<< endl;
                 return;
             }
         }
-        cout << "Username not found.";
+        cout << "Incorrect username or password. Please try again." << endl;
     }
 
     void startPrivateChat()
@@ -560,12 +617,6 @@ public:
 
     void createGroup()
     {
-        if (!isLoggedIn())
-        {
-            cout << "Login first.\n";
-            return;
-        }
-
         string name;
         cout << "Group name: ";
         cin.ignore();
@@ -575,7 +626,7 @@ public:
         members.push_back(getCurrentUsername());
 
         string uname;
-        cout << "Enter usernames to add (type 'done' to finish):\n";
+        cout << "Enter other members to add (type 'done' to finish):\n";
         while (true)
         {
             getline(cin, uname);
