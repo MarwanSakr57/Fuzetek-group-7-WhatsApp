@@ -162,10 +162,6 @@ public:
     {
         cout << "[" << timestamp << "] ";
         cout << sender << ": " << content;
-        if (replyTo != nullptr)
-        {
-            cout << " (reply to: " << replyTo->getContent() << ")";
-        }
         cout << " [" << status << "]";
         cout << endl;
     }
@@ -266,8 +262,7 @@ public:
             outputFile << endl;
         }
     } else {
-        // Handle error, e.g., print an error message
-        std::cerr << "Error opening file!" << std::endl;
+        cerr << "Error opening file!" << endl;
     }
     outputFile.close();
     }
@@ -755,7 +750,10 @@ public:
             getline(cin, messageText);
 
             if(messageText =="o") {
-                cout << "\n1. Exit chat\n2. Display chat\n3. Export Chat";
+                cout <<"\n1. Exit chat";
+                cout<<"\n2. Display chat";
+                cout<<"\n3. Export Chat";
+                cout<<"\n4. Search";
                 if (isGroup && (group->isAdmin(currentUser) || group->isCreator(currentUser))) {
                     cout << "\n4. Delete message";
                     cout << "\n5. Add participant";
@@ -778,6 +776,18 @@ public:
                     selectedChat->exportToFile(filename);
                     cout << "Chat exported to " << filename << endl;
                     continue;
+                }
+                if(option=="4"){
+                    string keyword;
+                    cout<<"Enter keyword to search :\n";
+                    getline(cin,keyword);
+                    auto messages=selectedChat->searchMessages(keyword);
+                    for(int i=1;i<messages.size()+1;i++){
+                        cout<<"Messages Found\n";
+                        cout<<i<<". ";
+                        messages[i-1].display();
+                        continue;
+                    }
                 }
                 if(isGroup && (group->isAdmin(currentUser) || group->isCreator(currentUser))) {
                     if(option =="4") {
